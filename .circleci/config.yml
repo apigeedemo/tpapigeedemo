@@ -11,7 +11,7 @@ parameters:
     default: "googleapi" # "apigeeapi"
   TEST_HOST:
     type: string
-    default: "https://34.111.166.185.nip.io"
+    default: "34.111.166.185.nip.io"
   DEFAULT_APIGEE_ENV:
     type: string
     default: "eval"
