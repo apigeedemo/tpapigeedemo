@@ -1,0 +1,219 @@
+version: 2.1
+
+
+parameters:
+
+  GOOGLE_API:
+    type: boolean
+    default: true
+  API_VERSION:
+    type: string
+    default: "googleapi" # "apigeeapi"
+  TEST_HOST:
+    type: string
+    default: "https://34.111.166.185.nip.io"
+  DEFAULT_APIGEE_ENV:
+    type: string
+    default: "env"
+  DEFAULT_APIGEE_ORG:
+    type: string
+    default: "tpapigeepov"
+
+
+workflows:
+
+  version: 2
+  apigee-deployment-and-tests:
+    jobs:
+      - install-dependencies
+      - static-code-analysis:
+          requires: 
+            - install-dependencies
+      - unit-test:
+          requires: 
+            - install-dependencies
+      - deploy_apigee:
+          requires: 
+            - static-code-analysis
+            - unit-test
+      - integration-test:
+         requires: 
+            - install-dependencies
+            - deploy_apigee
+
+jobs:
+
+# install npm package required for testing tools
+  install-dependencies:
+    docker:
+      - image: node:12-alpine
+    steps:
+      - checkout
+      - run:
+          name: install-curl
+          command: |
+            npm -g install curl
+      - run:
+          name: install-dependencies
+          command: |
+            cd /root/project
+            npm install --silent --no-fund
+      - persist_to_workspace:
+          root: .
+          paths:
+            - 'node_modules'
+
+# Static code analysis: Apigeelint (Apigee), ESlint (JS)
+  static-code-analysis:
+    docker:
+      - image: node:12-alpine
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: apigeelint
+          command: |
+            mkdir apigeelint
+            ./node_modules/apigeelint/cli.js -s ./apiproxy -f html.js -e PO013 > ./apigeelint/apigeelint-out.html
+      - store_artifacts:
+          path: apigeelint
+          destination: apigeelint-out.html
+      - run:
+          name: eslint
+          command: |
+            mkdir eslint
+            ./node_modules/eslint/bin/eslint.js -c ./.eslintrc-jsc.yml --format html ./apiproxy/resources/jsc > ./eslint/eslint-out.html
+      - store_artifacts:
+          path: eslint
+          destination: eslint-out.html
+
+# Unit Test: Mocha (JS)
+  unit-test:
+    docker:
+      - image: node:12-alpine
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: mocha
+          command: ./node_modules/nyc/bin/nyc.js --reporter=html --reporter=text ./node_modules/mocha/bin/_mocha ./test/unit
+      - store_artifacts:
+          path: ./coverage/
+          destination: index.html
+
+# Apigee Deployment: deploy configuration adn proxy with Maven
+  deploy_apigee:
+    docker:
+      - image: maven:latest
+    steps:   
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }} # appends cache key with a hash of pom.xml file
+            - v1-dependencies- # fallback in case previous cache key is not found
+      - run:
+          name: setup-environment
+          command: |
+            echo "export API_VERSION=<< pipeline.parameters.API_VERSION >>" >> $BASH_ENV
+            DEFAULT_APIGEE_ORG=<< pipeline.parameters.DEFAULT_APIGEE_ORG >> 
+            DEFAULT_APIGEE_ENV=<< pipeline.parameters.DEFAULT_APIGEE_ENV >>
+          
+            GIT_BRANCH=$CIRCLE_BRANCH
+            # Main branch for Apigee test environment
+            if [ $CIRCLE_BRANCH == "main" ]; then
+                echo "export APIGEE_ORG=$DEFAULT_APIGEE_ORG" >> $BASH_ENV
+                echo "export APIGEE_ENV=$DEFAULT_APIGEE_ENV" >> $BASH_ENV
+                echo "export APIGEE_DEPLOYMENT_SUFFIX=''" >> $BASH_ENV
+            # Prod branch for Apigee prod environment
+            else
+              if [ $CIRCLE_BRANCH == "prod" ]; then
+                echo "export APIGEE_ORG=$DEFAULT_APIGEE_ORG" >> $BASH_ENV
+                echo "export APIGEE_ENV=$CIRCLE_BRANCH" >> $BASH_ENV
+                echo "export APIGEE_DEPLOYMENT_SUFFIX=''" >> $BASH_ENV
+              # All other branches are deployed as separate proxies with suffix in the test environment
+              else
+                echo "export APIGEE_ORG=$DEFAULT_APIGEE_ORG" >> $BASH_ENV
+                echo "export APIGEE_ENV=$DEFAULT_APIGEE_ENV" >> $BASH_ENV
+                echo "export APIGEE_DEPLOYMENT_SUFFIX=${CIRCLE_BRANCH// /-}" >> $BASH_ENV
+              fi
+            fi
+      # googlapi (Apigee X/hybrid)
+      - when:
+          condition:
+            equal: [ googleapi, << pipeline.parameters.API_VERSION >> ]
+          steps:
+            - run:
+                name: get-GCP-Service-Account
+                command: |
+                  # Generate SA file from project variable
+                  cd /root/project
+                  echo $GCP_SERVICE_ACCOUNT > sa.json
+            - run:
+                name: mvn-deploy-config
+                command: |
+                  sed -i "s/target_apigee_env/$APIGEE_ENV/g" ./EdgeConfig/edge.json
+                  mvn install -Pgoogleapi -Dapigee.org=$APIGEE_ORG -Denv=$APIGEE_ENV -Dsa=sa.json -Dapigee.config.file=./EdgeConfig/edge.json -Dapigee.config.options=update
+            - run:
+                name: mvn-package-proxy
+                command: |
+                  mvn process-resources -P$API_VERSION -Dcommit=$GIT_COMMIT -Dbranch=$GIT_BRANCH  -Ddeployment.suffix=$APIGEE_DEPLOYMENT_SUFFIX
+            - run:
+                name: mvn-config-proxy
+                command: |
+                  mvn apigee-enterprise:configure -P$API_VERSION -Dorg=$APIGEE_ORG -Denv=$APIGEE_ENV  -Ddeployment.suffix=$APIGEE_DEPLOYMENT_SUFFIX 
+            - run:
+                name: mvn-deploy-proxy
+                command: |
+                  mvn apigee-enterprise:deploy -Pgoogleapi -Denv=$APIGEE_ENV -Dsa=sa.json -Dorg=$APIGEE_ORG -Ddeployment.suffix=$APIGEE_BUILD_DEPLOYMENT_SUFFIX 
+      #apigeeapi (Apigee Edge)    
+      - when:
+          condition:
+            equal: [ apigeeapi, << pipeline.parameters.API_VERSION >> ]
+          steps:
+            - run:
+                name: mvn-deploy-config
+                command: |
+                  sed -i "s/target_apigee_env/$APIGEE_ENV/g" ./EdgeConfig/edge.json
+                  mvn install -Papigeeapi -Dapigee.org=$APIGEE_ORG -Denv=$APIGEE_ENV -Dapigee.username=$APIGEE_CREDS_USR -Dapigee.password=$APIGEE_CREDS_PSW -Dapigee.config.file=./EdgeConfig/edge.json -Dapigee.config.options=update
+            - run:
+                name: mvn-package-proxy
+                command: |
+                  mvn process-resources -Papigeeapi -Dcommit=$GIT_COMMIT -Dbranch=$GIT_BRANCH -Ddeployment.suffix=$APIGEE_DEPLOYMENT_SUFFIX
+            - run:
+                name: mvn-config-proxy
+                command: |
+                  mvn apigee-enterprise:configure -Papigeeapi -Dorg=$APIGEE_ORG -Denv=$APIGEE_ENV  -Ddeployment.suffix=$APIGEE_DEPLOYMENT_SUFFIX 
+            - run:
+                name: mvn-deploy-proxy
+                command: |
+                  mvn apigee-enterprise:deploy -Papigeeapi -Dorg=$APIGEE_ORG -Denv=$APIGEE_ENV -Dpassword=$APIGEE_CREDS_PSW -Dusername=$APIGEE_CREDS_USR -Ddeployment.suffix=$APIGEE_BUILD_DEPLOYMENT_SUFFIX 
+      - save_cache:
+                  paths:
+                    - ~/.m2
+                  key: v1-dependencies-{{ checksum "pom.xml" }}
+
+# Integration test: Apickli
+  integration-test:
+    docker:
+      - image: node:12-alpine
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: apickli
+          command: |
+            export TEST_HOST=<< pipeline.parameters.TEST_HOST >>
+            
+            sed -i "s/organization_hostname/$TEST_HOST/g" ./test/integration/features/support/init.js
+            node ./node_modules/cucumber/bin/cucumber-js ./test/integration --format json:./report.json
+            node ./test/integration/index.js
+
+            mkdir apickli
+            mv cucumber_report.html apickli
+      - store_artifacts:
+          path: apickli
+          destination: cucumber_report.html
+
