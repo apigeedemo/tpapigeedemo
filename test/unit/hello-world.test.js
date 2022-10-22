@@ -10,9 +10,6 @@
      it("should return a 200 error code", function () {
        const mocks = mockFactory.getMock();
        mocks.contextGetVariableMethod
-         .withArgs("response.content")
-         .returns(JSON.stringify(top10Airports));
-       mocks.contextGetVariableMethod
          .withArgs("proxy.pathsuffix")
          .returns("/hello-world");
  
