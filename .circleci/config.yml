@@ -29,13 +29,13 @@ workflows:
       - static-code-analysis:
           requires: 
             - install-dependencies
-      # - unit-test:
-      #     requires: 
-      #       - install-dependencies
+      - unit-test:
+          requires: 
+            - install-dependencies
       - deploy_apigee:
           requires: 
             - static-code-analysis
-            # - unit-test
+            - unit-test
       - integration-test:
          requires: 
             - install-dependencies
@@ -89,19 +89,19 @@ jobs:
       #     destination: eslint-out.html
 
 # Unit Test: Mocha (JS)
-  # unit-test:
-  #   docker:
-  #     - image: node:12-alpine
-  #   steps:
-  #     - checkout
-  #     - attach_workspace:
-  #         at: .
-  #     - run:
-  #         name: mocha
-  #         command: ./node_modules/nyc/bin/nyc.js --reporter=html --reporter=text ./node_modules/mocha/bin/_mocha ./test/unit
-  #     - store_artifacts:
-  #         path: ./coverage/
-  #         destination: index.html
+  unit-test:
+    docker:
+      - image: node:12-alpine
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: mocha
+          command: ./node_modules/nyc/bin/nyc.js --reporter=html --reporter=text ./node_modules/mocha/bin/_mocha ./test/unit
+      - store_artifacts:
+          path: ./coverage/
+          destination: index.html
 
 # Apigee Deployment: deploy configuration adn proxy with Maven
   deploy_apigee:
