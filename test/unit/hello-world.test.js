@@ -2,9 +2,7 @@
  const assert = require("assert");
  const mockFactory = require("./common/mockFactory");
  
- const top10Airports = require("./common/testAirports");
  const requireUncached = require("./common/requireUncached");
- const jsFile = __dirname + "/../../apiproxy/resources/jsc/airportByCode.js";
  
  describe("Hello World Response", function () {
  
