@@ -29,9 +29,9 @@ workflows:
       - static-code-analysis:
           requires: 
             - install-dependencies
-      - unit-test:
-          requires: 
-            - install-dependencies
+      # - unit-test:
+      #     requires: 
+      #       - install-dependencies
       - deploy_apigee:
           requires: 
             - static-code-analysis
