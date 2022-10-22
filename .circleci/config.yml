@@ -26,12 +26,12 @@ workflows:
   apigee-deployment-and-tests:
     jobs:
       - install-dependencies
-      - static-code-analysis:
-          requires: 
-            - install-dependencies
-      - unit-test:
-          requires: 
-            - install-dependencies
+      # - static-code-analysis:
+      #     requires: 
+      #       - install-dependencies
+      # - unit-test:
+      #     requires: 
+      #       - install-dependencies
       - deploy_apigee:
           requires: 
             - static-code-analysis
