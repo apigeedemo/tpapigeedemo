@@ -13,11 +13,6 @@
          .withArgs("proxy.pathsuffix")
          .returns("/hello-world");
  
- 
-       assert(
-         mocks.contextSetVariableMethod.calledWith("response.status.code", 200),
-         "response.status.code set to 200"
-       );
      });
    });
  });
