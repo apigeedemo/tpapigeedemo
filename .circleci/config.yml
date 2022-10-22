@@ -26,12 +26,12 @@ workflows:
   apigee-deployment-and-tests:
     jobs:
       - install-dependencies
-      # - static-code-analysis:
-      #     requires: 
-      #       - install-dependencies
-      # - unit-test:
-      #     requires: 
-      #       - install-dependencies
+      - static-code-analysis:
+          requires: 
+            - install-dependencies
+      - unit-test:
+          requires: 
+            - install-dependencies
       - deploy_apigee:
           requires: 
             - static-code-analysis
@@ -64,44 +64,44 @@ jobs:
             - 'node_modules'
 
 # Static code analysis: Apigeelint (Apigee), ESlint (JS)
-  # static-code-analysis:
-  #   docker:
-  #     - image: node:12-alpine
-  #   steps:
-  #     - checkout
-  #     - attach_workspace:
-  #         at: .
-  #     - run:
-  #         name: apigeelint
-  #         command: |
-  #           mkdir apigeelint
-  #           ./node_modules/apigeelint/cli.js -s ./apiproxy -f html.js -e PO013 > ./apigeelint/apigeelint-out.html
-  #     - store_artifacts:
-  #         path: apigeelint
-  #         destination: apigeelint-out.html
-  #     - run:
-  #         name: eslint
-  #         command: |
-  #           mkdir eslint
-  #           ./node_modules/eslint/bin/eslint.js -c ./.eslintrc-jsc.yml --format html ./apiproxy/resources/jsc > ./eslint/eslint-out.html
-  #     - store_artifacts:
-  #         path: eslint
-  #         destination: eslint-out.html
+  static-code-analysis:
+    docker:
+      - image: node:12-alpine
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: apigeelint
+          command: |
+            mkdir apigeelint
+            ./node_modules/apigeelint/cli.js -s ./apiproxy -f html.js -e PO013 > ./apigeelint/apigeelint-out.html
+      - store_artifacts:
+          path: apigeelint
+          destination: apigeelint-out.html
+      - run:
+          name: eslint
+          command: |
+            mkdir eslint
+            ./node_modules/eslint/bin/eslint.js -c ./.eslintrc-jsc.yml --format html ./apiproxy/resources/jsc > ./eslint/eslint-out.html
+      - store_artifacts:
+          path: eslint
+          destination: eslint-out.html
 
 # Unit Test: Mocha (JS)
-  # unit-test:
-  #   docker:
-  #     - image: node:12-alpine
-  #   steps:
-  #     - checkout
-  #     - attach_workspace:
-  #         at: .
-  #     - run:
-  #         name: mocha
-  #         command: ./node_modules/nyc/bin/nyc.js --reporter=html --reporter=text ./node_modules/mocha/bin/_mocha ./test/unit
-  #     - store_artifacts:
-  #         path: ./coverage/
-  #         destination: index.html
+  unit-test:
+    docker:
+      - image: node:12-alpine
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: mocha
+          command: ./node_modules/nyc/bin/nyc.js --reporter=html --reporter=text ./node_modules/mocha/bin/_mocha ./test/unit
+      - store_artifacts:
+          path: ./coverage/
+          destination: index.html
 
 # Apigee Deployment: deploy configuration adn proxy with Maven
   deploy_apigee:
