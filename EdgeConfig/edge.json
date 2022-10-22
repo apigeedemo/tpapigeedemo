@@ -1,0 +1,25 @@
+{
+    "version":"1.0",
+    "envConfig":{
+       "target_apigee_env":{
+          "targetServers":[],
+          "virtualHosts":[],
+          "references":[],
+          "caches":[],
+          "resourcefiles":[],
+          "flowhooks":[],
+          "extensions":[],
+          "keystores":[],
+          "aliases":[]
+       }
+    },
+    "orgConfig":{
+       "specs":[],
+       "apiProducts":[],
+       "userroles":[],
+       "reports":[],
+       "developers":[],
+       "developerApps":{},
+       "importKeys":{}
+    }
+ }
