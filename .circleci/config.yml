@@ -14,7 +14,7 @@ parameters:
     default: "https://34.111.166.185.nip.io"
   DEFAULT_APIGEE_ENV:
     type: string
-    default: "env"
+    default: "eval"
   DEFAULT_APIGEE_ORG:
     type: string
     default: "tpapigeepov"
