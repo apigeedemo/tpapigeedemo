@@ -18,9 +18,9 @@ limitations under the License.
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>apigee-devrel</groupId>
-	<artifactId>hello-world-cicd</artifactId>
+	<artifactId>hello-world</artifactId>
 	<version>v1</version>
-	<name>hello-world-cicd${deployment.suffix}</name>
+	<name>hello-world${deployment.suffix}</name>
 	<packaging>pom</packaging>
 
 	<pluginRepositories>
