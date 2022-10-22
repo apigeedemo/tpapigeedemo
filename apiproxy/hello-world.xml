@@ -1,4 +1,4 @@
-<APIProxy revision="1" name="hello-world">
+<APIProxy revision="2" name="hello-world">
     <DisplayName>Hello World</DisplayName>
     <Description>Sample Hello World Proxy.</Description>
     <CreatedAt>1666085207554</CreatedAt>
