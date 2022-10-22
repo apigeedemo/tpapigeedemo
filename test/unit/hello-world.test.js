@@ -13,14 +13,6 @@
          .withArgs("proxy.pathsuffix")
          .returns("/hello-world");
  
-       let errorThrown = false;
-       try {
-         requireUncached(jsFile);
-       } catch (e) {
-         console.error(e);
-         errorThrown = true;
-       }
-       assert(errorThrown === false, "ran without error");
  
        assert(
          mocks.contextSetVariableMethod.calledWith("response.status.code", 200),
