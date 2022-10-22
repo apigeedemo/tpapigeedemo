@@ -18,9 +18,9 @@ limitations under the License.
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>apigee-devrel</groupId>
-	<artifactId>airports-cicd</artifactId>
+	<artifactId>hello-world-cicd</artifactId>
 	<version>v1</version>
-	<name>airports-cicd${deployment.suffix}</name>
+	<name>hello-world-cicd${deployment.suffix}</name>
 	<packaging>pom</packaging>
 
 	<pluginRepositories>
@@ -331,7 +331,7 @@ limitations under the License.
 					<basedir>${target.root.dir}</basedir>
 					<includes>
 						<include>test/integration/support/init.js</include>
-						<include>apiproxy/airports-cicd-v1.xml</include>
+						<include>apiproxy/hello-world.xml</include>
 						<include>apiproxy/proxies/default.xml</include>
 					</includes>
 					<replacements>
@@ -340,8 +340,8 @@ limitations under the License.
 							<value>${apigee.org}-${apigee.env}.apigee.net</value>
 						</replacement>
 						<replacement>
-							<token>/airports-cicd/v1</token>
-							<value>/airports-cicd${deployment.suffix}/v1</value>
+							<token>/hello-world/v1</token>
+							<value>/hello-world${deployment.suffix}/v1</value>
 						</replacement>
 						<replacement>
 							<token>@description</token>

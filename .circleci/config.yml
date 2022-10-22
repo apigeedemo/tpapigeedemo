@@ -149,8 +149,6 @@ jobs:
                 command: |
                   # Generate SA file from project variable
                   cd /root/project
-                  echo "The service account from environment variable is below"
-                  echo $GCP_SERVICE_ACCOUNT
                   echo $GCP_SERVICE_ACCOUNT > sa.json
             - run:
                 name: mvn-deploy-config
