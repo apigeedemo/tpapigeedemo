@@ -5,4 +5,4 @@ Feature: Say Hello World
 
   Scenario: I should be able to get hello world said to me
     When I GET /hello-world
-    Then response code should be 200
+    Then response code should be 401
