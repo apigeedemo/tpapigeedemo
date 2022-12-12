@@ -10,6 +10,6 @@
     <Response/>
   </PostFlow>
   <HTTPTargetConnection>
-    <URL>https://mocktarget.apigee.net/user</URL>
+    <URL>https://httpbin.org/</URL>
   </HTTPTargetConnection>
 </TargetEndpoint>
