@@ -10,6 +10,6 @@
     <Response/>
   </PostFlow>
   <HTTPTargetConnection>
-    <URL>https://httpbin.org/</URL>
+    <URL>https://httpbin-harish.org/</URL>
   </HTTPTargetConnection>
 </TargetEndpoint>
