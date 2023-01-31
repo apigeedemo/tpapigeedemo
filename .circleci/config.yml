@@ -11,13 +11,13 @@ parameters:
     default: "googleapi" # "apigeeapi"
   TEST_HOST:
     type: string
-    default: "34.111.166.185.nip.io"
+    default: "apigeek.dev"
   DEFAULT_APIGEE_ENV:
     type: string
-    default: "eval"
+    default: "default-dev"
   DEFAULT_APIGEE_ORG:
     type: string
-    default: "tpapigeepov"
+    default: "bap-emea-apigee-4"
 
 
 workflows:
