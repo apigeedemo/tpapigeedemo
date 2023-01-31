@@ -1,6 +1,6 @@
 <APIProxy revision="2" name="hello-world">
     <DisplayName>CI-CD Hello World</DisplayName>
-    <Description>Demo CI/CD </Description>
+    <Description>Demo CI/CD Proxy </Description>
     <CreatedAt>1666085207554</CreatedAt>
     <LastModifiedAt>1666085207554</LastModifiedAt>
     <BasePaths>/cicd/hello-world</BasePaths>

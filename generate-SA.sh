@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SA_NAME=azure-pipeline-pipeline
+SA_NAME=apigee-cicd-pipeline-pipeline
 
-gcloud iam service-accounts create $SA_NAME --display-name="Azure Pipeline Service Account"
+gcloud iam service-accounts create $SA_NAME --display-name="Apigee CICD Pipeline Service Account"
 
 PROJECT_ID=$(gcloud config get-value project)
 AZURE_SA=$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com
