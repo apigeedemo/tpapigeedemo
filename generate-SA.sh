@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SA_NAME=apigee-cicd-pipeline-pipeline
+SA_NAME=apigee-cicd-pipeline-sa
 
 gcloud iam service-accounts create $SA_NAME --display-name="Apigee CICD Pipeline Service Account"
 
