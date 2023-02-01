@@ -150,6 +150,9 @@ jobs:
                   # Generate SA file from project variable
                   cd /root/project
                   echo $GCP_SERVICE_ACCOUNT > sa.json
+                  pwd
+                  ls
+                  cat sa.json
             - run:
                 name: mvn-deploy-config
                 command: |
@@ -166,6 +169,7 @@ jobs:
             - run:
                 name: mvn-deploy-proxy
                 command: |
+                  pwd
                   ls
                   cat sa.json
                   mvn apigee-enterprise:deploy -Pgoogleapi -Denv=$APIGEE_ENV -Dsa=sa.json -Dorg=$APIGEE_ORG -Ddeployment.suffix=$APIGEE_BUILD_DEPLOYMENT_SUFFIX 
